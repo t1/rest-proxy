@@ -4,6 +4,8 @@ import static ch.qos.logback.classic.Level.*;
 import static com.github.t1.restproxy.TestTools.*;
 import static javax.ws.rs.core.MediaType.*;
 import static javax.ws.rs.core.Response.Status.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.data.MapEntry.*;
 import static org.junit.Assert.*;
 
 import org.glassfish.jersey.filter.LoggingFilter;
@@ -18,6 +20,10 @@ import lombok.extern.java.Log;
 
 @Log
 public class ProxyIT {
+    private static final String HTTP_CLIENT_4_5 = "Apache-HttpClient/4.5";
+    private static final String HTTP_CLIENT_4_5_CACHE = "1.1 localhost (" + HTTP_CLIENT_4_5 + " (cache))";
+    private static final String JAVA_VERSION = System.getProperty("java.version");
+
     @ClassRule
     public static final DropwizardClientRule TARGET = new DropwizardClientRule( //
             new LoggingFilter(log, true), //
@@ -70,6 +76,13 @@ public class ProxyIT {
 
         Echo response = new RestResource(PROXY_BASE.path("foo").path("bar")).GET(Echo.class);
 
+        assertEquals("GET", response.getMethod());
         assertEquals("bar", response.getPath());
+        assertThat(response.getHeaders()) //
+                .contains(entry("Accept", "text/plain; text/*; application/*; application/json")) //
+                .contains(entry("Host", TARGET_BASE.authority())) //
+                .contains(entry("User-Agent", HTTP_CLIENT_4_5 + " (Java/" + JAVA_VERSION + ")")) //
+                .contains(entry("Via", HTTP_CLIENT_4_5_CACHE + "; " + HTTP_CLIENT_4_5_CACHE)) //
+                ;
     }
 }

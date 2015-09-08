@@ -48,6 +48,7 @@ public class Config {
     }
 
     @JsonIgnore
+    @org.codehaus.jackson.annotate.JsonIgnore
     public void setTargetUriTemplate(UriTemplate template) {
         this.target = template.toString();
     }

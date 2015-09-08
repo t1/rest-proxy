@@ -55,6 +55,7 @@ public class ProxyResource {
             String headerValue = servletRequest.getHeader(headerName);
             log.debug("proxy header {}: {}", headerName, headerValue);
             outRequest = outRequest.header(headerName, headerValue);
+            // TODO add Via header
         }
         return outRequest;
     }
