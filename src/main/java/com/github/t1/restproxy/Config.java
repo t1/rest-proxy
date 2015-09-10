@@ -2,7 +2,8 @@ package com.github.t1.restproxy;
 
 import static lombok.AccessLevel.*;
 
-import javax.annotation.concurrent.Immutable;
+import java.nio.file.*;
+
 import javax.xml.bind.annotation.*;
 
 import com.github.t1.rest.UriTemplate;
@@ -10,7 +11,7 @@ import com.github.t1.rest.UriTemplate;
 import lombok.*;
 import lombok.experimental.Wither;
 
-@Immutable
+// @Immutable
 @Value
 @Wither
 @NoArgsConstructor(force = true, access = PRIVATE)
@@ -18,8 +19,32 @@ import lombok.experimental.Wither;
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.NONE)
 public class Config {
-    public static Config builder(String name) {
+    public static Config named(String name) {
         return new Config().withName(name);
+    }
+
+    // @Immutable
+    @Value
+    @Wither
+    @NoArgsConstructor(force = true, access = PRIVATE)
+    @AllArgsConstructor(access = PRIVATE)
+    @XmlRootElement
+    @XmlAccessorType(XmlAccessType.NONE)
+    public static class RecorderConfig {
+        public static RecorderConfig recorder() {
+            return new RecorderConfig();
+        }
+
+        @XmlElement
+        Path path;
+
+        public RecorderConfig withPath(Path path) {
+            return new RecorderConfig(path);
+        }
+
+        public RecorderConfig withPath(String first, String... more) {
+            return this.withPath(Paths.get(first, more));
+        }
     }
 
     @XmlAttribute
@@ -31,8 +56,15 @@ public class Config {
     @XmlElement
     UriTemplate target;
 
+    @XmlElement
+    RecorderConfig recorder;
+
     public boolean isPersistent() {
         return persistent == null || persistent == Boolean.TRUE;
+    }
+
+    public Config with(RecorderConfig recorder) {
+        return withRecorder(recorder);
     }
 
     public String resolve(String path) {

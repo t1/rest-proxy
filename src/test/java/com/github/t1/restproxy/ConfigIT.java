@@ -1,5 +1,6 @@
 package com.github.t1.restproxy;
 
+import static com.github.t1.restproxy.Config.RecorderConfig.*;
 import static com.github.t1.restproxy.ProxyServiceRule.*;
 import static java.util.Arrays.*;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -16,14 +17,15 @@ public class ConfigIT {
     private static final String PERSISTENT_CONFIG_JSON = "{" //
             + "\"name\":\"foo\"," //
             + "\"persistent\":true," //
-            + "\"target\":\"http://example.com/fox\"" //
+            + "\"target\":\"http://example.com/fox\"," //
+            + "\"recorder\":{\"path\":\"target/recordings\"}" //
             + "}" //
             ;
 
-    private static final Config CONFIG = Config //
-            .builder("foo") //
+    private static final Config CONFIG = Config.named("foo") //
             .withPersistent(false) //
             .withTarget(UriTemplate.fromString("http://example.com/fox")) //
+            .with(recorder().withPath("target", "recordings")) //
             ;
 
     private static final Config PERSISTENT_CONFIG = CONFIG.withPersistent(true);

@@ -1,5 +1,6 @@
 package com.github.t1.restproxy;
 
+import static com.github.t1.restproxy.Config.RecorderConfig.*;
 import static org.assertj.core.api.StrictAssertions.assertThat;
 import static org.assertj.core.api.ThrowableAssert.catchThrowable;
 import static org.junit.Assert.*;
@@ -18,16 +19,21 @@ public class ConfigTest {
     private static final String JSON = "{" //
             + "\"name\":\"foo/bar\"," //
             + "\"persistent\":false," //
-            + "\"target\":\"" + TARGET_URI + "\"" //
+            + "\"target\":\"" + TARGET_URI + "\"," //
+            + "\"recorder\":{\"path\":\"target/recordings\"}" //
             + "}";
     private static final String XML = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n" //
             + "<config name=\"foo/bar\" persistent=\"false\">\n" //
             + "    <target>" + TARGET_URI + "</target>\n" //
+            + "    <recorder>\n" //
+            + "        <path>target/recordings</path>\n" //
+            + "    </recorder>\n" //
             + "</config>\n";
     private static final Config CONFIG = Config //
-            .builder("foo/bar") //
+            .named("foo/bar") //
             .withPersistent(false) //
             .withTarget(TARGET_URI) //
+            .with(recorder().withPath("target", "recordings")) //
             ;
 
     private String xml(Object object) {
@@ -70,7 +76,7 @@ public class ConfigTest {
 
     @Test
     public void shouldBePersistentByDefault() {
-        Config config = Config.builder("foo");
+        Config config = Config.named("foo");
 
         assertNull("persistent", config.getPersistent());
         assertTrue("persistent", config.isPersistent());
@@ -101,7 +107,7 @@ public class ConfigTest {
 
     @Test
     public void shouldResolveFullyMatchingString() {
-        Config config = Config.builder("foo/bar").withTarget(TARGET_URI);
+        Config config = Config.named("foo/bar").withTarget(TARGET_URI);
 
         String resolved = config.resolve("foo/bar");
 
@@ -110,7 +116,7 @@ public class ConfigTest {
 
     @Test
     public void shouldFailToResolveFullyMatchingStringWithTrailingNonSlashCharacter() {
-        Config config = Config.builder("foo/bar").withTarget(TARGET_URI);
+        Config config = Config.named("foo/bar").withTarget(TARGET_URI);
 
         assertThat(catchThrowable(() -> {
             config.resolve("foo/barx");
@@ -121,7 +127,7 @@ public class ConfigTest {
 
     @Test
     public void shouldResolveMoreThanMatchingString() {
-        Config config = Config.builder("foo/bar").withTarget(TARGET_URI);
+        Config config = Config.named("foo/bar").withTarget(TARGET_URI);
 
         String resolved = config.resolve("foo/bar/baz");
 
@@ -130,7 +136,7 @@ public class ConfigTest {
 
     @Test
     public void shouldResolveMuchMoreThanMatchingString() {
-        Config config = Config.builder("foo/bar").withTarget(TARGET_URI);
+        Config config = Config.named("foo/bar").withTarget(TARGET_URI);
 
         String resolved = config.resolve("foo/bar/baz/bog");
 
