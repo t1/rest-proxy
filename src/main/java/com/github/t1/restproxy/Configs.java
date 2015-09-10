@@ -1,18 +1,35 @@
 package com.github.t1.restproxy;
 
+import static com.github.t1.rest.fallback.JsonMessageBodyReader.*;
+import static java.util.Collections.*;
+
+import java.io.IOException;
 import java.nio.file.*;
 import java.util.*;
 
 import javax.inject.Singleton;
 
-import com.github.t1.restproxy.Config.ConfigBuilder;
+import lombok.SneakyThrows;
 
-import lombok.Data;
-
-@Data
 @Singleton
 public class Configs {
-    private List<Config> configs = new ArrayList<>();
+    private final Path store = Paths.get("configs");
+    private final List<Config> configs = new ArrayList<>();
+
+    @SneakyThrows(IOException.class)
+    public Configs() {
+        if (Files.exists(store))
+            load();
+        else
+            Files.createDirectories(store);
+    }
+
+    // VisibleForTesting
+    @SneakyThrows(IOException.class)
+    public void load() {
+        for (Path file : Files.newDirectoryStream(store, "*.json"))
+            configs.add(MAPPER.readValue(file.toFile(), Config.class));
+    }
 
     public Optional<Config> get(String name) {
         return get(Paths.get(name));
@@ -28,21 +45,45 @@ public class Configs {
         return get(parentPath);
     }
 
+    public List<Config> getConfigs() {
+        return unmodifiableList(configs);
+    }
+
+    public Configs add(Config config) {
+        if (config.isPersistent())
+            save(config);
+        configs.add(config);
+        return this;
+    }
+
     public void remove(String path) {
         Iterator<Config> iter = configs.iterator();
         while (iter.hasNext()) {
             Config config = iter.next();
-            if (config.getName().equals(path))
+            if (config.getName().equals(path)) {
+                if (config.isPersistent())
+                    deleteStore(config);
                 iter.remove();
+            }
         }
     }
 
-    public Configs add(ConfigBuilder builder) {
-        return add(builder.build());
+    public void clear() {
+        while (!configs.isEmpty())
+            deleteStore(configs.remove(0));
     }
 
-    public Configs add(Config config) {
-        configs.add(config);
-        return this;
+    @SneakyThrows(IOException.class)
+    private void deleteStore(Config config) {
+        Files.deleteIfExists(fileName(config));
+    }
+
+    @SneakyThrows(IOException.class)
+    private void save(Config config) {
+        MAPPER.writeValue(Files.newBufferedWriter(fileName(config)), config);
+    }
+
+    private Path fileName(Config config) {
+        return store.resolve(config.getName() + ".json");
     }
 }

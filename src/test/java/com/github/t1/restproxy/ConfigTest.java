@@ -11,14 +11,24 @@ import javax.xml.bind.JAXB;
 import org.junit.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.t1.rest.UriTemplate;
 
 public class ConfigTest {
-    private static final String JSON = "{\"name\":\"foo\",\"target\":\"http://example.com\"}";
+    private static final UriTemplate TARGET_URI = UriTemplate.fromString("http://example.com/bab");
+    private static final String JSON = "{" //
+            + "\"name\":\"foo/bar\"," //
+            + "\"persistent\":false," //
+            + "\"target\":\"" + TARGET_URI + "\"" //
+            + "}";
     private static final String XML = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n" //
-            + "<config name=\"foo\">\n" //
-            + "    <target>http://example.com</target>\n" //
+            + "<config name=\"foo/bar\" persistent=\"false\">\n" //
+            + "    <target>" + TARGET_URI + "</target>\n" //
             + "</config>\n";
-    private static final Config CONFIG = Config.builder("foo").target("http://example.com").build();
+    private static final Config CONFIG = Config //
+            .builder("foo/bar") //
+            .withPersistent(false) //
+            .withTarget(TARGET_URI) //
+            ;
 
     private String xml(Object object) {
         StringWriter writer = new StringWriter();
@@ -59,6 +69,14 @@ public class ConfigTest {
     }
 
     @Test
+    public void shouldBePersistentByDefault() {
+        Config config = Config.builder("foo");
+
+        assertNull("persistent", config.getPersistent());
+        assertTrue("persistent", config.isPersistent());
+    }
+
+    @Test
     public void shouldFailToResolveEmptyString() {
         shouldFailToResolve("");
     }
@@ -74,10 +92,8 @@ public class ConfigTest {
     }
 
     private void shouldFailToResolve(String requestPath) {
-        Config config = Config.builder("foo/bar").target("target").build();
-
         assertThat(catchThrowable(() -> {
-            config.resolve(requestPath);
+            CONFIG.resolve(requestPath);
         })) //
                 .isInstanceOf(AssertionError.class) //
                 .hasMessageContaining("expected requested path '" + requestPath + "' to start with 'foo/bar'");
@@ -85,7 +101,7 @@ public class ConfigTest {
 
     @Test
     public void shouldResolveFullyMatchingString() {
-        Config config = Config.builder("foo/bar").target("target").build();
+        Config config = Config.builder("foo/bar").withTarget(TARGET_URI);
 
         String resolved = config.resolve("foo/bar");
 
@@ -94,7 +110,7 @@ public class ConfigTest {
 
     @Test
     public void shouldFailToResolveFullyMatchingStringWithTrailingNonSlashCharacter() {
-        Config config = Config.builder("foo/bar").target("target").build();
+        Config config = Config.builder("foo/bar").withTarget(TARGET_URI);
 
         assertThat(catchThrowable(() -> {
             config.resolve("foo/barx");
@@ -105,7 +121,7 @@ public class ConfigTest {
 
     @Test
     public void shouldResolveMoreThanMatchingString() {
-        Config config = Config.builder("foo/bar").target("target").build();
+        Config config = Config.builder("foo/bar").withTarget(TARGET_URI);
 
         String resolved = config.resolve("foo/bar/baz");
 
@@ -114,7 +130,7 @@ public class ConfigTest {
 
     @Test
     public void shouldResolveMuchMoreThanMatchingString() {
-        Config config = Config.builder("foo/bar").target("target").build();
+        Config config = Config.builder("foo/bar").withTarget(TARGET_URI);
 
         String resolved = config.resolve("foo/bar/baz/bog");
 

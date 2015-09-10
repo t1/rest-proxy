@@ -1,40 +1,39 @@
 package com.github.t1.restproxy;
 
-import static javax.xml.bind.annotation.XmlAccessType.*;
 import static lombok.AccessLevel.*;
 
+import javax.annotation.concurrent.Immutable;
 import javax.xml.bind.annotation.*;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.github.t1.rest.UriTemplate;
 
 import lombok.*;
+import lombok.experimental.Wither;
 
-@Data
-@Builder
+@Immutable
+@Value
+@Wither
 @NoArgsConstructor(force = true, access = PRIVATE)
 @AllArgsConstructor(access = PRIVATE)
 @XmlRootElement
-@XmlAccessorType(FIELD)
+@XmlAccessorType(XmlAccessType.NONE)
 public class Config {
-    public static class ConfigBuilder {
-        public ConfigBuilder target(UriTemplate target) {
-            return this.target(target.toString());
-        }
-
-        public ConfigBuilder target(String target) {
-            this.target = target;
-            return this;
-        }
-    }
-
-    public static ConfigBuilder builder(String name) {
-        return new ConfigBuilder().name(name);
+    public static Config builder(String name) {
+        return new Config().withName(name);
     }
 
     @XmlAttribute
     String name;
-    String target;
+
+    @XmlAttribute
+    Boolean persistent;
+
+    @XmlElement
+    UriTemplate target;
+
+    public boolean isPersistent() {
+        return persistent == null || persistent == Boolean.TRUE;
+    }
 
     public String resolve(String path) {
         if (!path.startsWith(name))
@@ -45,15 +44,5 @@ public class Config {
         if (!path.startsWith("/"))
             throw new AssertionError("expected requested path '" + path + "' to continue with a slash '/' or nothing");
         return path.substring(1);
-    }
-
-    @JsonIgnore
-    @org.codehaus.jackson.annotate.JsonIgnore
-    public void setTargetUriTemplate(UriTemplate template) {
-        this.target = template.toString();
-    }
-
-    public UriTemplate getTargetUriTemplate() {
-        return UriTemplate.fromString(target);
     }
 }

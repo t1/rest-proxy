@@ -55,7 +55,7 @@ public class ProxyIT {
 
     @Test
     public void shouldNotGetProxiedResourceWithMinus() {
-        Config config = Config.builder("proxy target").build();
+        Config config = Config.builder("proxy target");
         CONFIG.PUT(config);
 
         EntityResponse<String> response = new RestResource(PROXY_BASE.path("-nowhere")).GET_Response(String.class);
@@ -72,7 +72,7 @@ public class ProxyIT {
 
     @Test
     public void shouldGetProxiedResource() {
-        ProxyServiceRule.CONFIGS.add(Config.builder("foo").target(TARGET_BASE));
+        ProxyServiceRule.CONFIGS.add(Config.builder("foo").withTarget(TARGET_BASE));
 
         Echo response = new RestResource(PROXY_BASE.path("foo").path("bar")).GET(Echo.class);
 

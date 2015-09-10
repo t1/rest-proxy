@@ -44,7 +44,7 @@ public class ProxyResource {
     }
 
     private RestRequest<String> request(Config config, String path) {
-        UriTemplate target = config.getTargetUriTemplate();
+        UriTemplate target = config.getTarget();
         log.debug("proxy to {} with path {}", target, path);
         UriTemplate uri = target.nonQuery().path(config.resolve(path));
         RestRequest<String> outRequest = new RestResource(uri).request().accept(String.class);
