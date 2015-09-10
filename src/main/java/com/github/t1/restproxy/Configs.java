@@ -13,11 +13,16 @@ import lombok.SneakyThrows;
 
 @Singleton
 public class Configs {
-    private final Path store = Paths.get("configs");
+    private final Path store;
     private final List<Config> configs = new ArrayList<>();
 
-    @SneakyThrows(IOException.class)
     public Configs() {
+        this(Paths.get("configs"));
+    }
+
+    @SneakyThrows(IOException.class)
+    public Configs(Path store) {
+        this.store = store;
         if (Files.exists(store))
             load();
         else

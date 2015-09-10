@@ -1,5 +1,7 @@
 package com.github.t1.restproxy;
 
+import java.nio.file.*;
+
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
 import org.glassfish.jersey.filter.LoggingFilter;
 
@@ -9,7 +11,8 @@ import lombok.extern.java.Log;
 @Log
 class ProxyServiceRule extends DropwizardClientRule {
     public static final ConfigResource CONFIG_RESOURCE = new ConfigResource();
-    public static final Configs CONFIGS = new Configs();
+    public static final Path CONFIGS_PATH = Paths.get("target", "configs");
+    public static final Configs CONFIGS = new Configs(CONFIGS_PATH);
 
     ProxyServiceRule() {
         super( //
