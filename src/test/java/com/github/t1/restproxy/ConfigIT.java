@@ -1,6 +1,5 @@
 package com.github.t1.restproxy;
 
-import static com.github.t1.restproxy.Config.RecorderConfig.*;
 import static com.github.t1.restproxy.ProxyServiceRule.*;
 import static java.util.Arrays.*;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -17,15 +16,13 @@ public class ConfigIT {
     private static final String PERSISTENT_CONFIG_JSON = "{" //
             + "\"name\":\"foo\"," //
             + "\"persistent\":true," //
-            + "\"target\":\"http://example.com/fox\"," //
-            + "\"recorder\":{\"path\":\"target/recordings\"}" //
+            + "\"target\":\"http://example.com/fox\"" //
             + "}" //
             ;
 
     private static final Config CONFIG = Config.named("foo") //
             .withPersistent(false) //
             .withTarget(UriTemplate.fromString("http://example.com/fox")) //
-            .with(recorder().withPath("target", "recordings")) //
             ;
 
     private static final Config PERSISTENT_CONFIG = CONFIG.withPersistent(true);
@@ -41,6 +38,11 @@ public class ConfigIT {
     @After
     public void cleanup() {
         CONFIGS.remove(PERSISTENT_CONFIG.getName());
+    }
+
+    private void post(Config config) {
+        // TODO implement proxy.POST(Config.class);
+        CONFIG_RESOURCE.post(config);
     }
 
     @Test
@@ -62,17 +64,28 @@ public class ConfigIT {
 
     @Test
     public void shouldPostConfig() {
-        // TODO implement proxy.POST(Config.class);
-        CONFIG_RESOURCE.post(CONFIG);
+        post(CONFIG);
 
         assertEquals(asList(CONFIG), CONFIGS.getConfigs());
     }
 
     @Test
+    public void shouldOverwriteConfig() {
+        post(CONFIG);
+
+        post(Config.named("foo") //
+                .withPersistent(false) //
+                .withTarget(UriTemplate.fromString("http://example.com/fox2")));
+
+        assertThat(CONFIGS.getConfigs()) //
+                .extracting((c) -> c.getTarget().path().toString()) //
+                .containsOnly("/fox2");
+    }
+
+    @Test
     public void shouldPersistPostedConfig() {
         // the file will be removed in #cleanup()
-        // TODO use http POST when available
-        CONFIG_RESOURCE.post(PERSISTENT_CONFIG);
+        post(PERSISTENT_CONFIG);
 
         assertThat(FOO_CONFIG_PATH).hasContent(PERSISTENT_CONFIG_JSON);
     }

@@ -35,6 +35,7 @@ public class EchoIT {
     public void shouldEchoGET() {
         Echo echo = echoResource.header("fooheader", "bar").GET(Echo.class);
 
+        softly.assertThat(echo.getId()).isNotNull();
         softly.assertThat(echo.getMethod()).isEqualTo("GET");
         softly.assertThat(echo.getPath()).isEqualTo("foo");
         softly.assertThat(echo.getHeaders().get("fooheader")).isEqualTo("bar");

@@ -23,6 +23,7 @@ public class EchoResource {
     @AllArgsConstructor(access = PRIVATE)
     @NoArgsConstructor(force = true, access = PRIVATE)
     public static class Echo {
+        UUID id;
         String method;
         String path;
         Map<String, String> headers;
@@ -37,6 +38,7 @@ public class EchoResource {
     public Echo get(@PathParam("path") String path, String body) {
         log.debug("echo {}", path);
         return Echo.builder() //
+                .id(UUID.randomUUID()) //
                 .method("GET") //
                 .path(path) //
                 .headers(headers()) //

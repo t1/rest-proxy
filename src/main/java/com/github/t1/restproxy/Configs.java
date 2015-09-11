@@ -33,7 +33,7 @@ public class Configs {
     @SneakyThrows(IOException.class)
     public void load() {
         for (Path file : Files.newDirectoryStream(store, "*.json"))
-            configs.add(MAPPER.readValue(file.toFile(), Config.class));
+            add(MAPPER.readValue(file.toFile(), Config.class));
     }
 
     public Optional<Config> get(String name) {
@@ -55,6 +55,7 @@ public class Configs {
     }
 
     public Configs add(Config config) {
+        remove(config.getName());
         if (config.isPersistent())
             save(config);
         configs.add(config);

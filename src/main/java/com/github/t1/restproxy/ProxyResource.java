@@ -29,6 +29,9 @@ public class ProxyResource {
     @Inject
     Configs configs;
 
+    @Inject
+    Contexts contexts;
+
     @Context
     HttpServletRequest servletRequest;
 
@@ -47,7 +50,7 @@ public class ProxyResource {
         UriTemplate target = config.getTarget();
         log.debug("proxy to {} with path {}", target, path);
         UriTemplate uri = target.nonQuery().path(config.resolve(path));
-        RestRequest<String> outRequest = new RestResource(uri).request().accept(String.class);
+        RestRequest<String> outRequest = contexts.get(config).createResource(uri).request().accept(String.class);
         for (Enumeration<String> e = servletRequest.getHeaderNames(); e.hasMoreElements();) {
             String headerName = e.nextElement();
             if (NON_PROXIABLE_HEADERS.contains(headerName.toLowerCase(US)))
