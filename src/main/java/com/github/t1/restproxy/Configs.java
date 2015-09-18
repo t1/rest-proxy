@@ -10,7 +10,9 @@ import java.util.*;
 import javax.inject.Singleton;
 
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Singleton
 public class Configs {
     private final Path store;
@@ -32,8 +34,10 @@ public class Configs {
     // VisibleForTesting
     @SneakyThrows(IOException.class)
     public void load() {
-        for (Path file : Files.newDirectoryStream(store, "*.json"))
+        for (Path file : Files.newDirectoryStream(store, "*.json")) {
+            log.info("loading config from {}", file);
             add(MAPPER.readValue(file.toFile(), Config.class));
+        }
     }
 
     public Optional<Config> get(String name) {

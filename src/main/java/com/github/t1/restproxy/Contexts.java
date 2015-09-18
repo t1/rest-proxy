@@ -19,7 +19,7 @@ public class Contexts {
     private RestContext createContext(Config config) {
         RestContext context = RestContext.REST;
         if (config.getRecorder() != null)
-            context = new RestClientRecorder(context, config.getRecorder().getPath()).context();
+            context = new RestClientRecorder(context, config.getRecorder().getPersistencePath()).context();
         return context;
     }
 }

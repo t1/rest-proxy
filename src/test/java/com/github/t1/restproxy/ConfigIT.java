@@ -40,7 +40,7 @@ public class ConfigIT {
         CONFIGS.remove(PERSISTENT_CONFIG.getName());
     }
 
-    private void post(Config config) {
+    private void given(Config config) {
         // TODO implement proxy.POST(Config.class);
         CONFIG_RESOURCE.post(config);
     }
@@ -64,16 +64,16 @@ public class ConfigIT {
 
     @Test
     public void shouldPostConfig() {
-        post(CONFIG);
+        given(CONFIG);
 
         assertEquals(asList(CONFIG), CONFIGS.getConfigs());
     }
 
     @Test
     public void shouldOverwriteConfig() {
-        post(CONFIG);
+        given(CONFIG);
 
-        post(Config.named("foo") //
+        given(Config.named("foo") //
                 .withPersistent(false) //
                 .withTarget(UriTemplate.fromString("http://example.com/fox2")));
 
@@ -85,7 +85,7 @@ public class ConfigIT {
     @Test
     public void shouldPersistPostedConfig() {
         // the file will be removed in #cleanup()
-        post(PERSISTENT_CONFIG);
+        given(PERSISTENT_CONFIG);
 
         assertThat(FOO_CONFIG_PATH).hasContent(PERSISTENT_CONFIG_JSON);
     }

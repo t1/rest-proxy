@@ -6,6 +6,7 @@ import java.nio.file.*;
 
 import javax.xml.bind.annotation.*;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.github.t1.rest.UriTemplate;
 
 import lombok.*;
@@ -36,7 +37,7 @@ public class Config {
         }
 
         @XmlElement
-        Path path;
+        Path persistencePath;
 
         public RecorderConfig withPath(Path path) {
             return new RecorderConfig(path);
@@ -54,13 +55,21 @@ public class Config {
     Boolean persistent;
 
     @XmlElement
+    @org.codehaus.jackson.annotate.JsonIgnore
     UriTemplate target;
 
     @XmlElement
     RecorderConfig recorder;
 
+    @JsonIgnore // use field
+    @org.codehaus.jackson.annotate.JsonIgnore
     public boolean isPersistent() {
         return persistent == null || persistent == Boolean.TRUE;
+    }
+
+    @org.codehaus.jackson.annotate.JsonProperty("target")
+    public String getCodehausTarget() {
+        return target.toString();
     }
 
     public Config with(RecorderConfig recorder) {

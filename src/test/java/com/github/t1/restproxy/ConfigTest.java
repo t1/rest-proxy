@@ -20,13 +20,13 @@ public class ConfigTest {
             + "\"name\":\"foo/bar\"," //
             + "\"persistent\":false," //
             + "\"target\":\"" + TARGET_URI + "\"," //
-            + "\"recorder\":{\"path\":\"target/recordings\"}" //
+            + "\"recorder\":{\"persistencePath\":\"target/recordings\"}" //
             + "}";
     private static final String XML = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n" //
             + "<config name=\"foo/bar\" persistent=\"false\">\n" //
             + "    <target>" + TARGET_URI + "</target>\n" //
             + "    <recorder>\n" //
-            + "        <path>target/recordings</path>\n" //
+            + "        <persistencePath>target/recordings</persistencePath>\n" //
             + "    </recorder>\n" //
             + "</config>\n";
     private static final Config CONFIG = Config //
