@@ -69,7 +69,7 @@ public class Config {
 
     @org.codehaus.jackson.annotate.JsonProperty("target")
     public String getCodehausTarget() {
-        return target.toString();
+        return (target == null) ? null : target.toString();
     }
 
     public Config with(RecorderConfig recorder) {
